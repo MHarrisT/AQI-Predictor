@@ -1,0 +1,5 @@
+requests
+pandas
+hopsworks
+python-dotenv
+confluent-kafka
