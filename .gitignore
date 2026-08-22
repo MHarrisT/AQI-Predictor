@@ -10,3 +10,4 @@ __pycache__/
 model_dir/
 downloaded_model_dir
 *.bak
+.obsidian
