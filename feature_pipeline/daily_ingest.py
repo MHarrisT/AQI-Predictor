@@ -14,8 +14,10 @@ HOPSWORKS_API_KEY = os.getenv("HOPSWORKS_API_KEY")
 LAT, LON = 31.5204, 74.3587
 CITY_NAME = "Lahore"
 
+
 def calculate_epa_aqi(pm25):
-    if pm25 is None: return 0
+    if pm25 is None:
+        return 0
     breakpoints = [
         (0.0, 12.0, 0, 50),
         (12.1, 35.4, 51, 100),
@@ -23,12 +25,12 @@ def calculate_epa_aqi(pm25):
         (55.5, 150.4, 151, 200),
         (150.5, 250.4, 201, 300),
         (250.5, 350.4, 301, 400),
-        (350.5, 500.4, 401, 500)
+        (350.5, 500.4, 401, 500),
     ]
-    for (c_low, c_high, i_low, i_high) in breakpoints:
+    for c_low, c_high, i_low, i_high in breakpoints:
         if c_low <= pm25 <= c_high:
             return round(((i_high - i_low) / (c_high - c_low)) * (pm25 - c_low) + i_low)
-    return 500 # Max out if very high
+    return 500  # Max out if very high
 
 
 def fetch_raw_data() -> pd.DataFrame:
