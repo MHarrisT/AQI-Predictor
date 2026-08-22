@@ -3,9 +3,7 @@ import warnings
 
 # 1. Suppress all standard warnings and TensorFlow C++ logs globally
 warnings.filterwarnings("ignore")
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = (
-    "3" 
-)
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 import json
 import shap
