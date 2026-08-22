@@ -117,7 +117,7 @@ def store_historical_features(df: pd.DataFrame):
     )
 
     print(f"Uploading {len(df)} historical rows to Hopsworks...")
-    aqi_fg.insert(df, write_options={"wait_for_job": True})
+    aqi_fg.insert(df, write_options={"wait_for_job": False})
     print("Backfill complete!")
 
 

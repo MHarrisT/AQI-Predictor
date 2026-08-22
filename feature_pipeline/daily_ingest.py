@@ -98,7 +98,7 @@ def store_features(df: pd.DataFrame):
     )
 
     # Insert the dataframe
-    aqi_fg.insert(df, write_options={"wait_for_job": True})
+    aqi_fg.insert(df, write_options={"wait_for_job": False})
     print("Successfully loaded features into Hopsworks!")
 
 
