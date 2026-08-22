@@ -117,19 +117,18 @@ API_URL = "http://localhost:8000/predict"
 
 
 def get_aqi_details(aqi):
-    # OpenWeather AQI scale is 1 to 5
-    # 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor
-    val = round(aqi)
-    if val <= 1:
+    if aqi <= 50:
         return "#10B981", "Good"
-    elif val == 2:
-        return "#F59E0B", "Fair"
-    elif val == 3:
-        return "#F97316", "Moderate"
-    elif val == 4:
-        return "#EF4444", "Poor"
+    elif aqi <= 100:
+        return "#F59E0B", "Moderate"
+    elif aqi <= 150:
+        return "#F97316", "Unhealthy for Sensitive Groups"
+    elif aqi <= 200:
+        return "#EF4444", "Unhealthy"
+    elif aqi <= 300:
+        return "#D946EF", "Very Unhealthy"
     else:
-        return "#8B5CF6", "Very Poor"
+        return "#9F1239", "Hazardous"
 
 
 with st.spinner("Fetching high-resolution AI predictions..."):
@@ -160,11 +159,11 @@ with st.spinner("Fetching high-resolution AI predictions..."):
                         title={"text": "Predicted AQI", "font": {"size": 24}},
                         number={
                             "font": {"size": 60, "color": color},
-                            "valueformat": ".1f",
+                            "valueformat": ".0f",
                         },
                         gauge={
                             "axis": {
-                                "range": [1, 5],
+                                "range": [0, 500],
                                 "tickwidth": 1,
                                 "tickcolor": "gray",
                             },
@@ -172,26 +171,12 @@ with st.spinner("Fetching high-resolution AI predictions..."):
                             "bgcolor": "rgba(128,128,128,0.1)",
                             "borderwidth": 0,
                             "steps": [
-                                {
-                                    "range": [1, 1.5],
-                                    "color": "rgba(16, 185, 129, 0.15)",
-                                },
-                                {
-                                    "range": [1.5, 2.5],
-                                    "color": "rgba(245, 158, 11, 0.15)",
-                                },
-                                {
-                                    "range": [2.5, 3.5],
-                                    "color": "rgba(249, 115, 22, 0.15)",
-                                },
-                                {
-                                    "range": [3.5, 4.5],
-                                    "color": "rgba(239, 68, 68, 0.15)",
-                                },
-                                {
-                                    "range": [4.5, 5],
-                                    "color": "rgba(139, 92, 246, 0.15)",
-                                },
+                                {"range": [0, 50], "color": "rgba(16, 185, 129, 0.15)"},
+                                {"range": [51, 100], "color": "rgba(245, 158, 11, 0.15)"},
+                                {"range": [101, 150], "color": "rgba(249, 115, 22, 0.15)"},
+                                {"range": [151, 200], "color": "rgba(239, 68, 68, 0.15)"},
+                                {"range": [201, 300], "color": "rgba(217, 70, 239, 0.15)"},
+                                {"range": [301, 500], "color": "rgba(159, 18, 57, 0.15)"},
                             ],
                         },
                     )
