@@ -77,15 +77,12 @@ def predict_3_days():
                     "no2": comps.get("no2"),
                     "o3": comps.get("o3"),
                     "pm2_5": comps.get("pm2_5"),
-                    "pm10": comps.get("pm10"),
                     "temp": w_entry["main"].get("temp"),
                     "humidity": w_entry["main"].get("humidity"),
                     "hour": target_noon.hour,
                     "day": target_noon.day,
                     "month": target_noon.month,
-                    "lag_1_aqi": p_entry["main"][
-                        "aqi"
-                    ],  # Use forecasted AQI index as lag approximation
+                    "lag_1_aqi": p_entry["main"]["aqi"],  # Use forecasted AQI index as lag approximation
                     "aqi_change_rate": 0.0,  # Naive approximation
                     "rolling_avg_7_day": p_entry["main"]["aqi"],  # Naive approximation
                 }

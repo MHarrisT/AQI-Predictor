@@ -15,6 +15,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import hopsworks
+import shutil
 from dotenv import load_dotenv, find_dotenv
 
 # Scikit-Learn & XGBoost
@@ -80,7 +81,9 @@ def fetch_and_preprocess_data():
     # ---------------------------------------------------------
     # PREPROCESSING STEP 4: Feature/Target Split
     # ---------------------------------------------------------
-    X = df.drop(columns=["aqi", "city", "timestamp"])
+    # Restore pollutant features to ensure accurate AQI predictions.
+    # We drop 'pm10' to reduce multicollinearity (since it's 97% correlated with pm2_5).
+    X = df.drop(columns=["aqi", "city", "timestamp", "pm10"])
     y = df["aqi"]
 
     # ---------------------------------------------------------
@@ -248,11 +251,13 @@ def main():
             best_r2 = metrics["test"]["R2"]
             best_model_name = name
 
-    print(f"\n🏆 Best Model: {best_model_name} (Test R² = {best_r2:.4f})")
+    print(f"\nBest Model: {best_model_name} (Test R2 = {best_r2:.4f})")
 
     # 4. Store the best trained model in the Model Registry
     print(f"\nSaving {best_model_name} to Model Registry...")
     mr = project.get_model_registry()
+    if os.path.exists("model_dir"):
+        shutil.rmtree("model_dir")
     os.makedirs("model_dir", exist_ok=True)
     
     # Save Analytics Data
@@ -275,6 +280,17 @@ def main():
 
     # Generate Analytics Plots
     print("Generating Analytics Plots...")
+    
+    # 2.5 Correlation Matrix
+    plt.figure(figsize=(10, 8))
+    cols_to_corr = ["aqi", "pm2_5", "pm10", "temp", "humidity", "co", "no2", "o3"]
+    # Only keep cols that actually exist in df_full
+    cols_to_corr = [c for c in cols_to_corr if c in df_full.columns]
+    corr = df_full[cols_to_corr].corr()
+    sns.heatmap(corr, annot=True, cmap="RdBu_r", vmin=-1, vmax=1, fmt=".2f", linewidths=0.5)
+    plt.title("Feature Correlation Matrix")
+    plt.savefig("model_dir/correlation_matrix.png", bbox_inches='tight', dpi=150)
+    plt.close()
     
     # 3. Residuals Plot
     best_preds = best_model.predict(X_test).flatten()
