@@ -29,7 +29,9 @@ def load_model():
     mr = project.get_model_registry()
 
     # Download the best model (which we named aqi_predictor_best)
-    hw_model = mr.get_model("aqi_predictor_best", version=1)
+    models = mr.get_models("aqi_predictor_best")
+    latest_version = max([m.version for m in models])
+    hw_model = mr.get_model("aqi_predictor_best", version=latest_version)
     model_dir = hw_model.download()
 
     model = joblib.load(model_dir + "/aqi_model.pkl")
