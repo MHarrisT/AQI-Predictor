@@ -101,7 +101,17 @@ def fetch_and_preprocess_data():
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    return project, X_train_scaled, X_test_scaled, y_train, y_test, scaler, X_test, df, X.columns.tolist()
+    return (
+        project,
+        X_train_scaled,
+        X_test_scaled,
+        y_train,
+        y_test,
+        scaler,
+        X_test,
+        df,
+        X.columns.tolist(),
+    )
 
 
 def train_and_evaluate(X_train, X_test, y_train, y_test):
@@ -223,7 +233,17 @@ def evaluate_preds(y_true, y_pred):
 
 def main():
     # 1. Fetch & Preprocess
-    project, X_train, X_test, y_train, y_test, scaler, X_test_unscaled, df_full, feature_names = fetch_and_preprocess_data()
+    (
+        project,
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+        scaler,
+        X_test_unscaled,
+        df_full,
+        feature_names,
+    ) = fetch_and_preprocess_data()
 
     # 2. Train & Evaluate Models
     print("\nStarting Model Training...")
@@ -259,12 +279,12 @@ def main():
     if os.path.exists("model_dir"):
         shutil.rmtree("model_dir")
     os.makedirs("model_dir", exist_ok=True)
-    
+
     # Save Analytics Data
     # 1. Model Metrics
     with open("model_dir/model_metrics.json", "w") as f:
         json.dump(results, f, indent=4)
-        
+
     # 2. EDA Sample
     df_full.tail(500).to_csv("model_dir/eda_sample.csv", index=False)
 
@@ -282,57 +302,81 @@ def main():
 
     # Generate Analytics Plots
     print("Generating Analytics Plots...")
-    
+
     # 2.5 Correlation Matrix
     plt.figure(figsize=(10, 8))
     cols_to_corr = ["aqi", "pm2_5", "pm10", "temp", "humidity", "co", "no2", "o3"]
     # Only keep cols that actually exist in df_full
     cols_to_corr = [c for c in cols_to_corr if c in df_full.columns]
     corr = df_full[cols_to_corr].corr()
-    sns.heatmap(corr, annot=True, cmap="RdBu_r", vmin=-1, vmax=1, fmt=".2f", linewidths=0.5)
+    sns.heatmap(
+        corr, annot=True, cmap="RdBu_r", vmin=-1, vmax=1, fmt=".2f", linewidths=0.5
+    )
     plt.title("Feature Correlation Matrix")
-    plt.savefig("model_dir/correlation_matrix.png", bbox_inches='tight', dpi=150)
+    plt.savefig("model_dir/correlation_matrix.png", bbox_inches="tight", dpi=150)
     plt.close()
-    
+
     # 3. Residuals Plot
     best_preds = best_model.predict(X_test).flatten()
     residuals = y_test - best_preds
-    plt.figure(figsize=(8,5))
+    plt.figure(figsize=(8, 5))
     sns.histplot(residuals, kde=True, color="#D946EF")
     plt.title("Residual Distribution (True - Predicted)")
     plt.xlabel("Residual")
     plt.ylabel("Frequency")
-    plt.savefig("model_dir/residuals.png", bbox_inches='tight', dpi=150)
+    plt.savefig("model_dir/residuals.png", bbox_inches="tight", dpi=150)
     plt.close()
-    
+
     # 4. Error Over Category
     def categorize_aqi(aqi):
-        if aqi <= 50: return "Good"
-        elif aqi <= 100: return "Moderate"
-        elif aqi <= 150: return "Unhealthy/Sens."
-        elif aqi <= 200: return "Unhealthy"
-        elif aqi <= 300: return "Very Unhealthy"
-        else: return "Hazardous"
-        
+        if aqi <= 50:
+            return "Good"
+        elif aqi <= 100:
+            return "Moderate"
+        elif aqi <= 150:
+            return "Unhealthy/Sens."
+        elif aqi <= 200:
+            return "Unhealthy"
+        elif aqi <= 300:
+            return "Very Unhealthy"
+        else:
+            return "Hazardous"
+
     cats = y_test.apply(categorize_aqi)
     errs = abs(y_test - best_preds)
     err_df = pd.DataFrame({"Category": cats, "Error": errs})
-    cat_order = ["Good", "Moderate", "Unhealthy/Sens.", "Unhealthy", "Very Unhealthy", "Hazardous"]
-    plt.figure(figsize=(10,5))
-    sns.barplot(data=err_df, x="Category", y="Error", order=cat_order, errorbar=None, palette="magma")
+    cat_order = [
+        "Good",
+        "Moderate",
+        "Unhealthy/Sens.",
+        "Unhealthy",
+        "Very Unhealthy",
+        "Hazardous",
+    ]
+    plt.figure(figsize=(10, 5))
+    sns.barplot(
+        data=err_df,
+        x="Category",
+        y="Error",
+        order=cat_order,
+        errorbar=None,
+        palette="magma",
+    )
     plt.title("Mean Absolute Error by AQI Category")
     plt.ylabel("MAE")
-    plt.savefig("model_dir/error_by_category.png", bbox_inches='tight', dpi=150)
+    plt.savefig("model_dir/error_by_category.png", bbox_inches="tight", dpi=150)
     plt.close()
-    
+
     # 5. SHAP Summary Plot (For XGBoost or Random Forest)
     if best_model_name in ["XGBoost", "Random_Forest"]:
         try:
             explainer = shap.TreeExplainer(best_model)
             shap_values = explainer.shap_values(X_test_unscaled)
             plt.figure()
-            shap.summary_plot(shap_values, X_test_unscaled, feature_names=feature_names, show=False)
-            plt.savefig("model_dir/shap_summary.png", bbox_inches='tight', dpi=150)
+            shap.summary_plot(
+                shap_values, X_test_unscaled, feature_names=feature_names, show=False
+            )
+            plt.savefig("model_dir/shap_summary.png", bbox_inches="tight", dpi=150)
             plt.close()
         except Exception as e:
             print(f"Failed to generate SHAP: {e}")

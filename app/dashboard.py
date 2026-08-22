@@ -123,7 +123,10 @@ def get_aqi_details(aqi):
     else:
         return "#9F1239", "Hazardous"
 
-tab1, tab2, tab3 = st.tabs(["Forecast & Alerts", "Exploratory Data Analysis (EDA)", "Model Evaluation"])
+
+tab1, tab2, tab3 = st.tabs(
+    ["Forecast & Alerts", "Exploratory Data Analysis (EDA)", "Model Evaluation"]
+)
 
 with tab1:
     with st.spinner("Fetching high-resolution AI predictions..."):
@@ -135,10 +138,12 @@ with tab1:
 
                 today_data = forecast[0]
                 future_data = forecast[1:]
-                
+
                 # Hazardous Alert
                 if today_data["predicted_aqi"] > 300:
-                    st.error("🚨 **HAZARDOUS AIR QUALITY WARNING** 🚨\n\nThe predicted AQI has exceeded 300. It is strongly advised to stay indoors and keep windows closed.")
+                    st.error(
+                        "🚨 **HAZARDOUS AIR QUALITY WARNING** 🚨\n\nThe predicted AQI has exceeded 300. It is strongly advised to stay indoors and keep windows closed."
+                    )
 
                 st.markdown(
                     "### 📍 Current Forecast Details (Today)", unsafe_allow_html=True
@@ -170,12 +175,30 @@ with tab1:
                                 "bgcolor": "rgba(128,128,128,0.1)",
                                 "borderwidth": 0,
                                 "steps": [
-                                    {"range": [0, 50], "color": "rgba(16, 185, 129, 0.15)"},
-                                    {"range": [51, 100], "color": "rgba(245, 158, 11, 0.15)"},
-                                    {"range": [101, 150], "color": "rgba(249, 115, 22, 0.15)"},
-                                    {"range": [151, 200], "color": "rgba(239, 68, 68, 0.15)"},
-                                    {"range": [201, 300], "color": "rgba(217, 70, 239, 0.15)"},
-                                    {"range": [301, 500], "color": "rgba(159, 18, 57, 0.15)"},
+                                    {
+                                        "range": [0, 50],
+                                        "color": "rgba(16, 185, 129, 0.15)",
+                                    },
+                                    {
+                                        "range": [51, 100],
+                                        "color": "rgba(245, 158, 11, 0.15)",
+                                    },
+                                    {
+                                        "range": [101, 150],
+                                        "color": "rgba(249, 115, 22, 0.15)",
+                                    },
+                                    {
+                                        "range": [151, 200],
+                                        "color": "rgba(239, 68, 68, 0.15)",
+                                    },
+                                    {
+                                        "range": [201, 300],
+                                        "color": "rgba(217, 70, 239, 0.15)",
+                                    },
+                                    {
+                                        "range": [301, 500],
+                                        "color": "rgba(159, 18, 57, 0.15)",
+                                    },
                                 ],
                             },
                         )
@@ -296,67 +319,94 @@ with tab1:
 
 with tab2:
     st.markdown("### 📊 Exploratory Data Analysis")
-    st.markdown("Explore the underlying relationships in the historical air quality dataset.")
-    
+    st.markdown(
+        "Explore the underlying relationships in the historical air quality dataset."
+    )
+
     with st.spinner("Loading Exploratory Data Analysis..."):
         try:
             eda_resp = requests.get(f"{API_URL.replace('/predict', '/eda-data')}")
             if eda_resp.status_code == 200:
                 eda_df = pd.DataFrame(eda_resp.json())
-                
+
                 st.markdown("#### PM2.5 vs AQI Trend")
                 fig_scatter = px.scatter(
-                    eda_df, x="pm2_5", y="aqi", color="aqi",
+                    eda_df,
+                    x="pm2_5",
+                    y="aqi",
+                    color="aqi",
                     color_continuous_scale="magma",
                     labels={"pm2_5": "PM2.5 (µg/m³)", "aqi": "AQI Score"},
-                    title="Relationship between Particulate Matter and AQI"
+                    title="Relationship between Particulate Matter and AQI",
                 )
                 st.plotly_chart(fig_scatter, use_container_width=True)
-                
+
                 st.markdown("#### Feature Correlation Matrix")
-                st.image(f"{API_URL.replace('/predict', '/analytics-image/correlation_matrix.png')}", use_container_width=True)
-                
+                st.image(
+                    f"{API_URL.replace('/predict', '/analytics-image/correlation_matrix.png')}",
+                    use_container_width=True,
+                )
+
             else:
-                st.warning("EDA data not available yet. Has the model finished training?")
+                st.warning(
+                    "EDA data not available yet. Has the model finished training?"
+                )
         except Exception as e:
             st.warning(f"Backend API is not reachable to fetch EDA data. Error: {e}")
 
 with tab3:
     st.markdown("### 🤖 AI Model Evaluation")
-    
+
     with st.spinner("Loading Model Metrics..."):
         try:
             metrics_resp = requests.get(f"{API_URL.replace('/predict', '/models')}")
             if metrics_resp.status_code == 200:
                 metrics_data = metrics_resp.json()
-                
+
                 st.markdown("#### 🏆 Model Leaderboard")
                 # Convert nested JSON into a DataFrame
                 table_data = []
                 for model_name, data in metrics_data.items():
-                    table_data.append({
-                        "Model": model_name,
-                        "Train R²": data["train"]["R2"],
-                        "Test R²": data["test"]["R2"],
-                        "Test MAE": data["test"]["MAE"],
-                        "Test RMSE": data["test"]["RMSE"]
-                    })
-                metrics_df = pd.DataFrame(table_data).sort_values("Test R²", ascending=False)
+                    table_data.append(
+                        {
+                            "Model": model_name,
+                            "Train R²": data["train"]["R2"],
+                            "Test R²": data["test"]["R2"],
+                            "Test MAE": data["test"]["MAE"],
+                            "Test RMSE": data["test"]["RMSE"],
+                        }
+                    )
+                metrics_df = pd.DataFrame(table_data).sort_values(
+                    "Test R²", ascending=False
+                )
                 st.dataframe(metrics_df, use_container_width=True, hide_index=True)
-                
+
                 st.markdown("#### 🧠 Feature Importance (SHAP)")
-                st.markdown("This chart explains *why* the XGBoost model makes its predictions by showing the impact of each feature.")
-                st.image(f"{API_URL.replace('/predict', '/analytics-image/shap_summary.png')}", use_container_width=True)
-                
+                st.markdown(
+                    "This chart explains *why* the XGBoost model makes its predictions by showing the impact of each feature."
+                )
+                st.image(
+                    f"{API_URL.replace('/predict', '/analytics-image/shap_summary.png')}",
+                    use_container_width=True,
+                )
+
                 col1, col2 = st.columns(2)
                 with col1:
                     st.markdown("#### 🎯 Prediction Error by Category")
-                    st.image(f"{API_URL.replace('/predict', '/analytics-image/error_by_category.png')}", use_container_width=True)
+                    st.image(
+                        f"{API_URL.replace('/predict', '/analytics-image/error_by_category.png')}",
+                        use_container_width=True,
+                    )
                 with col2:
                     st.markdown("#### 📉 Residual Distribution")
-                    st.image(f"{API_URL.replace('/predict', '/analytics-image/residuals.png')}", use_container_width=True)
-                    
+                    st.image(
+                        f"{API_URL.replace('/predict', '/analytics-image/residuals.png')}",
+                        use_container_width=True,
+                    )
+
             else:
                 st.warning("Model evaluation metrics not available yet.")
         except Exception as e:
-            st.warning(f"Backend API is not reachable to fetch model metrics. Error: {e}")
+            st.warning(
+                f"Backend API is not reachable to fetch model metrics. Error: {e}"
+            )

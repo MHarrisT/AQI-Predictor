@@ -97,7 +97,9 @@ def predict_3_days():
                     "hour": target_noon.hour,
                     "day": target_noon.day,
                     "month": target_noon.month,
-                    "lag_1_aqi": p_entry["main"]["aqi"],  # Use forecasted AQI index as lag approximation
+                    "lag_1_aqi": p_entry["main"][
+                        "aqi"
+                    ],  # Use forecasted AQI index as lag approximation
                     "aqi_change_rate": 0.0,  # Naive approximation
                     "rolling_avg_7_day": p_entry["main"]["aqi"],  # Naive approximation
                 }
@@ -126,17 +128,20 @@ def predict_3_days():
 
     return {"city": CITY_NAME, "forecast": predictions}
 
+
 @app.get("/models")
 def get_models():
     """Returns model metrics JSON."""
     with open(f"{model_dir_path}/model_metrics.json", "r") as f:
         return json.load(f)
 
+
 @app.get("/eda-data")
 def get_eda():
     """Returns EDA sample CSV as JSON."""
     df = pd.read_csv(f"{model_dir_path}/eda_sample.csv")
     return df.to_dict(orient="records")
+
 
 @app.get("/analytics-image/{image_name}")
 def get_analytics_image(image_name: str):
