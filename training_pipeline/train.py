@@ -275,6 +275,8 @@ def main():
     best_model = models[best_model_name]
     if best_model_name == "RNN":
         best_model.save("model_dir/aqi_model.h5")
+    elif best_model_name == "XGBoost":
+        best_model.save_model("model_dir/aqi_model.json")
     else:
         joblib.dump(best_model, "model_dir/aqi_model.pkl")
 

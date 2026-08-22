@@ -35,9 +35,24 @@ def load_model():
     models = mr.get_models("aqi_predictor_best")
     latest_version = max([m.version for m in models])
     hw_model = mr.get_model("aqi_predictor_best", version=latest_version)
-    model_dir_path = hw_model.download()
+    import shutil
+    import os
+    
+    local_model_dir = os.path.join(os.getcwd(), "model_dir")
+    if os.path.exists(local_model_dir):
+        shutil.rmtree(local_model_dir)
+        
+    model_dir_path = hw_model.download(local_path=local_model_dir)
 
-    model = joblib.load(model_dir_path + "/aqi_model.pkl")
+    if os.path.exists(model_dir_path + "/aqi_model.json"):
+        from xgboost import XGBRegressor
+        model = XGBRegressor()
+        model.load_model(model_dir_path + "/aqi_model.json")
+    elif os.path.exists(model_dir_path + "/aqi_model.h5"):
+        import tensorflow as tf
+        model = tf.keras.models.load_model(model_dir_path + "/aqi_model.h5")
+    else:
+        model = joblib.load(model_dir_path + "/aqi_model.pkl")
     scaler = joblib.load(model_dir_path + "/scaler.pkl")
     print("Model and scaler loaded successfully.")
 
