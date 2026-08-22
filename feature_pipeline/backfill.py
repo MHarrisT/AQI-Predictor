@@ -13,6 +13,22 @@ HOPSWORKS_API_KEY = os.getenv("HOPSWORKS_API_KEY")
 LAT, LON = 31.5204, 74.3587
 CITY_NAME = "Lahore"
 
+def calculate_epa_aqi(pm25):
+    if pm25 is None: return 0
+    breakpoints = [
+        (0.0, 12.0, 0, 50),
+        (12.1, 35.4, 51, 100),
+        (35.5, 55.4, 101, 150),
+        (55.5, 150.4, 151, 200),
+        (150.5, 250.4, 201, 300),
+        (250.5, 350.4, 301, 400),
+        (350.5, 500.4, 401, 500)
+    ]
+    for (c_low, c_high, i_low, i_high) in breakpoints:
+        if c_low <= pm25 <= c_high:
+            return round(((i_high - i_low) / (c_high - c_low)) * (pm25 - c_low) + i_low)
+    return 500 # Max out if very high
+
 
 def fetch_historical_pollution(days=365) -> pd.DataFrame:
     """Fetches historical pollution data from the OpenWeather API."""
@@ -35,7 +51,7 @@ def fetch_historical_pollution(days=365) -> pd.DataFrame:
                 {
                     "city": CITY_NAME,
                     "timestamp": datetime.fromtimestamp(item["dt"], tz=timezone.utc),
-                    "aqi": item["main"]["aqi"],
+                    "aqi": calculate_epa_aqi(comp.get("pm2_5", 0)),
                     "co": comp.get("co"),
                     "no2": comp.get("no2"),
                     "o3": comp.get("o3"),
@@ -90,8 +106,16 @@ def store_historical_features(df: pd.DataFrame):
     project = hopsworks.login(api_key_value=HOPSWORKS_API_KEY)
     fs = project.get_feature_store()
 
-    # Connect to the exact same version 3 feature group we created earlier
-    aqi_fg = fs.get_feature_group(name="aqi_features", version=3)
+    # Bump to version 4 for the 0-500 scale
+    aqi_fg = fs.get_or_create_feature_group(
+        name="aqi_features",
+        version=4,
+        description="Air Quality Index and Weather Features",
+        primary_key=["city"],
+        event_time="timestamp",
+        online_enabled=False,
+        time_travel_format="HUDI",
+    )
 
     print(f"Uploading {len(df)} historical rows to Hopsworks...")
     aqi_fg.insert(df, write_options={"wait_for_job": True})

@@ -44,7 +44,7 @@ def fetch_and_preprocess_data():
     fs = project.get_feature_store()
 
     # Fetch historical data directly from the feature group
-    aqi_fg = fs.get_feature_group(name="aqi_features", version=3)
+    aqi_fg = fs.get_feature_group(name="aqi_features", version=4)
     df = aqi_fg.read()
 
     # ---------------------------------------------------------

@@ -14,6 +14,22 @@ HOPSWORKS_API_KEY = os.getenv("HOPSWORKS_API_KEY")
 LAT, LON = 31.5204, 74.3587
 CITY_NAME = "Lahore"
 
+def calculate_epa_aqi(pm25):
+    if pm25 is None: return 0
+    breakpoints = [
+        (0.0, 12.0, 0, 50),
+        (12.1, 35.4, 51, 100),
+        (35.5, 55.4, 101, 150),
+        (55.5, 150.4, 151, 200),
+        (150.5, 250.4, 201, 300),
+        (250.5, 350.4, 301, 400),
+        (350.5, 500.4, 401, 500)
+    ]
+    for (c_low, c_high, i_low, i_high) in breakpoints:
+        if c_low <= pm25 <= c_high:
+            return round(((i_high - i_low) / (c_high - c_low)) * (pm25 - c_low) + i_low)
+    return 500 # Max out if very high
+
 
 def fetch_raw_data() -> pd.DataFrame:
     """Fetches raw weather and pollutant data from the OpenWeather API."""
@@ -30,7 +46,7 @@ def fetch_raw_data() -> pd.DataFrame:
     data = {
         "city": CITY_NAME,
         "timestamp": datetime.now(timezone.utc),
-        "aqi": aqi,
+        "aqi": calculate_epa_aqi(components.get("pm2_5", 0)),
         "co": components.get("co"),
         "no2": components.get("no2"),
         "o3": components.get("o3"),
@@ -68,10 +84,10 @@ def store_features(df: pd.DataFrame):
     project = hopsworks.login(api_key_value=HOPSWORKS_API_KEY)
     fs = project.get_feature_store()
 
-    # Version 3: Disabled online store to bypass Kafka authorization errors
+    # Version 4: 0-500 EPA AQI scale
     aqi_fg = fs.get_or_create_feature_group(
         name="aqi_features",
-        version=3,
+        version=4,
         description="Air Quality Index and Weather Features",
         primary_key=["city"],
         event_time="timestamp",
