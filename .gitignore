@@ -7,3 +7,5 @@ __pycache__/
 # Jupyter / OS
 .ipynb_checkpoints/
 .DS_Store
+model_dir/
+*.bak
