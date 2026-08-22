@@ -37,19 +37,21 @@ def load_model():
     hw_model = mr.get_model("aqi_predictor_v3", version=latest_version)
     import shutil
     import os
-    
+
     local_model_dir = os.path.join(os.getcwd(), "model_dir")
     if os.path.exists(local_model_dir):
         shutil.rmtree(local_model_dir)
-        
+
     model_dir_path = hw_model.download(local_path=local_model_dir)
 
     if os.path.exists(model_dir_path + "/aqi_model.json"):
         from xgboost import XGBRegressor
+
         model = XGBRegressor()
         model.load_model(model_dir_path + "/aqi_model.json")
     elif os.path.exists(model_dir_path + "/aqi_model.h5"):
         import tensorflow as tf
+
         model = tf.keras.models.load_model(model_dir_path + "/aqi_model.h5")
     else:
         model = joblib.load(model_dir_path + "/aqi_model.pkl")
