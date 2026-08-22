@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10' # Specify your python version
+          python-version: '3.12' # Specify your python version
           cache: 'pip'
           
       - name: Install dependencies
@@ -33,4 +33,5 @@ jobs:
         env:
           # Pulls the secret from your GitHub repository settings
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
         run: python feature_pipeline/daily_ingest.py
