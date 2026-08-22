@@ -3,3 +3,8 @@ pandas
 hopsworks
 python-dotenv
 confluent-kafka
+scikit-learn 
+statsmodels 
+tensorflow
+xgboost
+joblib
