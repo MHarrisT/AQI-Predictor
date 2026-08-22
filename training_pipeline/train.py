@@ -4,7 +4,7 @@ import warnings
 # 1. Suppress all standard warnings and TensorFlow C++ logs globally
 warnings.filterwarnings("ignore")
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = (
-    "3"  # 3 = FATAL only (silences info, warnings, and errors)
+    "3" 
 )
 
 import json
@@ -63,7 +63,6 @@ def fetch_and_preprocess_data():
     # ---------------------------------------------------------
     print("Handling missing values...")
     df = df.set_index("timestamp")
-    # Fix for Pandas FutureWarning: explicitly infer objects before interpolating
     df = df.infer_objects(copy=False)
     df = df.interpolate(method="time")
     df = df.ffill().bfill()
@@ -381,7 +380,6 @@ def main():
         except Exception as e:
             print(f"Failed to generate SHAP: {e}")
 
-    # Fix for Hopsworks ProvenanceWarning: Provide an input example so it infers the schema
     input_sample = X_train[:1].tolist()
 
     # Register in Hopsworks

@@ -59,9 +59,6 @@ def fetch_historical_pollution(days=365) -> pd.DataFrame:
                     "o3": comp.get("o3"),
                     "pm2_5": comp.get("pm2_5"),
                     "pm10": comp.get("pm10"),
-                    # Note: Free tier historical weather data requires a different paid API.
-                    # We will use static placeholders for temp/humidity in the historical dataset
-                    # so the baseline model can focus purely on pollution trends.
                     "temp": 25.0,
                     "humidity": 50,
                 }
@@ -108,7 +105,7 @@ def store_historical_features(df: pd.DataFrame):
     project = hopsworks.login(api_key_value=HOPSWORKS_API_KEY)
     fs = project.get_feature_store()
 
-    # Bump to version 4 for the 0-500 scale
+    # Version 4: 0-500 EPA AQI scale
     aqi_fg = fs.get_or_create_feature_group(
         name="aqi_features",
         version=4,
