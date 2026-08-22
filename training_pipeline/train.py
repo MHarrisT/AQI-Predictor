@@ -386,7 +386,7 @@ def main():
 
     # Register in Hopsworks
     aqi_model = mr.python.create_model(
-        name="aqi_predictor_best",
+        name="aqi_predictor_v3",
         metrics=results[best_model_name]["test"],
         input_example=input_sample,
         description=f"Best performing model: {best_model_name}",

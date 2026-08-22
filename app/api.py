@@ -31,10 +31,10 @@ def load_model():
     project = hopsworks.login(api_key_value=HOPSWORKS_API_KEY)
     mr = project.get_model_registry()
 
-    # Download the best model (which we named aqi_predictor_best)
-    models = mr.get_models("aqi_predictor_best")
+    # Download the best model (which we named aqi_predictor_v3)
+    models = mr.get_models("aqi_predictor_v3")
     latest_version = max([m.version for m in models])
-    hw_model = mr.get_model("aqi_predictor_best", version=latest_version)
+    hw_model = mr.get_model("aqi_predictor_v3", version=latest_version)
     import shutil
     import os
     
