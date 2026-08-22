@@ -172,11 +172,26 @@ with st.spinner("Fetching high-resolution AI predictions..."):
                             "borderwidth": 0,
                             "steps": [
                                 {"range": [0, 50], "color": "rgba(16, 185, 129, 0.15)"},
-                                {"range": [51, 100], "color": "rgba(245, 158, 11, 0.15)"},
-                                {"range": [101, 150], "color": "rgba(249, 115, 22, 0.15)"},
-                                {"range": [151, 200], "color": "rgba(239, 68, 68, 0.15)"},
-                                {"range": [201, 300], "color": "rgba(217, 70, 239, 0.15)"},
-                                {"range": [301, 500], "color": "rgba(159, 18, 57, 0.15)"},
+                                {
+                                    "range": [51, 100],
+                                    "color": "rgba(245, 158, 11, 0.15)",
+                                },
+                                {
+                                    "range": [101, 150],
+                                    "color": "rgba(249, 115, 22, 0.15)",
+                                },
+                                {
+                                    "range": [151, 200],
+                                    "color": "rgba(239, 68, 68, 0.15)",
+                                },
+                                {
+                                    "range": [201, 300],
+                                    "color": "rgba(217, 70, 239, 0.15)",
+                                },
+                                {
+                                    "range": [301, 500],
+                                    "color": "rgba(159, 18, 57, 0.15)",
+                                },
                             ],
                         },
                     )
