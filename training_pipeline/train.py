@@ -387,7 +387,7 @@ def main():
         input_example=input_sample,
         description=f"Best performing model: {best_model_name}",
     )
-    aqi_model.save("model_dir")
+    aqi_model.save("model_dir") 
     print("\nModel successfully registered in Hopsworks!")
 
 
