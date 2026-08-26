@@ -75,6 +75,12 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
     df["aqi_change_rate"] = 0.0
     df["rolling_avg_7_day"] = 0.0
 
+    # Enforce float types to match the expected 'double' schema in Hopsworks
+    float_cols = ["co", "no2", "o3", "pm2_5", "pm10", "temp"]
+    for col in float_cols:
+        if col in df.columns:
+            df[col] = df[col].astype(float)
+
     return df
 
 
