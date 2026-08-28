@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 import pandas as pd
 from datetime import datetime, timezone
@@ -103,8 +104,18 @@ def store_features(df: pd.DataFrame):
         time_travel_format="HUDI",
     )
 
-    # Insert the dataframe
-    aqi_fg.insert(df, write_options={"wait_for_job": False})
+    # Insert the dataframe with retries
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            aqi_fg.insert(df, write_options={"wait_for_job": False})
+            break
+        except Exception as e:
+            print(f"Insert attempt {attempt + 1} failed: {e}")
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(10)
+            
     print("Successfully loaded features into Hopsworks!")
 
 
