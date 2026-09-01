@@ -115,7 +115,7 @@ def store_features(df: pd.DataFrame):
             if attempt == max_retries - 1:
                 raise
             time.sleep(10)
-            
+
     print("Successfully loaded features into Hopsworks!")
 
 
