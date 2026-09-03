@@ -4,11 +4,11 @@ hopsworks
 python-dotenv
 confluent-kafka
 scikit-learn 
-statsmodels 
-tensorflow
-xgboost
 joblib
 pyarrow
 shap
 matplotlib
 seaborn
+statsmodels ; python_version <= '3.12'
+tensorflow ; python_version <= '3.12'
+xgboost ; python_version <= '3.12'
